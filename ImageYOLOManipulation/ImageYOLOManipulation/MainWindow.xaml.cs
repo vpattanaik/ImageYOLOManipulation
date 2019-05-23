@@ -34,6 +34,7 @@ namespace ImageYOLOManipulation
         int countOfEmptyImags;
         FishImage[] Fishes;
         int indexofShowingFish = 0;
+        bool stopPlay = false;
         
         private void ButtonLoadImage_Click(object sender, RoutedEventArgs e)
         {
@@ -43,6 +44,7 @@ namespace ImageYOLOManipulation
             loadImageFiles.ShowDialog();
             pathOfOneImage = loadImageFiles.FileName;
             Thread showImage = new Thread(ShowImage);
+            showImage.SetApartmentState(ApartmentState.STA);
             showImage.Start();
         }
         void ShowImage()
@@ -97,6 +99,15 @@ namespace ImageYOLOManipulation
             imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Source = Fishes[indexofShowingFish].GetImage(); }));
             imageFishName.Dispatcher.Invoke(new Action(() => { imageFishName.Text = "Name : " + Fishes[indexofShowingFish].ImageName(); }));
             IndexText.Dispatcher.Invoke(new Action(() => { IndexText.Text = "Image " + indexofShowingFish.ToString() + " of " + pathOfAllImages.Length.ToString(); }));
+            if (Fishes[indexofShowingFish].IsAnnotated())
+            {
+                double[][] fishes = Fishes[indexofShowingFish].GetFishRectangles();
+                //canvasFish.Children.Add(fishBox);
+                canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetLeft(fishBox, fishes[0][0]); }));
+                canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetTop(fishBox, fishes[0][1]); }));
+                fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Width = fishes[0][2];  }));
+                fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Height = fishes[0][3]; }));
+            }
         }
         private void Invoke(Action action)
         {
@@ -107,23 +118,25 @@ namespace ImageYOLOManipulation
         {
            
             Thread showPlayImage = new Thread(ShowPlayImage);
+            showPlayImage.SetApartmentState(ApartmentState.STA);
             if (buttonPlay.Content.ToString() == "Play")
             {
                 buttonPlay.Content = "Pause";
+                stopPlay = false;
                 showPlayImage.Start();
             }
             else
             {
                 buttonPlay.Content = "Play";
-                showPlayImage.Abort();
+                stopPlay = true;
             }
             
             
         }
-
+       
         private void ShowPlayImage()
         {
-            while (true)
+            while (!stopPlay)
             {
                 indexofShowingFish++;
                 GUIShowImage();                
@@ -143,7 +156,7 @@ namespace ImageYOLOManipulation
         private  double imageWidth;
         private  double imageHeight;
         private  BitmapImage fishImage;
-        private  Rectangle [] fishRectangles;
+        private double[][] fishRectangles;
         private bool isImageLoaded;
         public FishImage(string path)
         {
@@ -185,7 +198,7 @@ namespace ImageYOLOManipulation
             isImageLoaded = true;
             return fishImage;
         }
-        public Rectangle [] GetFishRectangles()
+        public double[] [] GetFishRectangles()
         {
             if (annotationPath != null && isImageLoaded == true)
             {
@@ -214,10 +227,10 @@ namespace ImageYOLOManipulation
         {
 
         }
-        public Rectangle [] GetRectanglesOfFishes (string annotationPath ,double width, double height)
+        public double [][] GetRectanglesOfFishes (string annotationPath ,double width, double height)
         {
             string[] fisheAnnotationLine = File.ReadAllLines(annotationPath);
-            Rectangle [] fishRectangles = new Rectangle[fisheAnnotationLine.Length];
+            double[][] fishRectangles = new double[fisheAnnotationLine.Length][];
             int indexer = 0;
             foreach (string rectagle in fisheAnnotationLine)
             {
@@ -230,12 +243,11 @@ namespace ImageYOLOManipulation
                     w = width * Convert.ToDouble(splittedString[3]);
                     h = height * Convert.ToDouble(splittedString[4]);
                     // Create rectangle.
-                    fishRectangles[indexer] = new Rectangle();
-                    fishRectangles[indexer].SetValue(Canvas.LeftProperty, Convert.ToInt32(x));
-                    fishRectangles[indexer].SetValue(Canvas.TopProperty, Convert.ToInt32(y));
-                    fishRectangles[indexer].Width = Convert.ToInt32(w);
-                    fishRectangles[indexer].Height = Convert.ToInt32(h);
-                    fishRectangles[indexer].Stroke = new SolidColorBrush() { Color = Colors.AliceBlue, Opacity = 0.75f };
+                    fishRectangles[indexer] = new double[4];                        
+                    fishRectangles[indexer][0] = Convert.ToInt32(x);
+                    fishRectangles[indexer][1] = Convert.ToInt32(y);
+                    fishRectangles[indexer][2] = Convert.ToInt32(w);
+                    fishRectangles[indexer][3] = Convert.ToInt32(h);
                     indexer++;
                 }
             }

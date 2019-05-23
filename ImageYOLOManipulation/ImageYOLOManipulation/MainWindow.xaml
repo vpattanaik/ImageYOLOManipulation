@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageYOLOManipulation"
         mc:Ignorable="d"
-        Title="YOLO Image Preperations" Height="812.934" Width="1525.928">
+        Title="YOLO Image Preperations" Height="713.206" Width="1525.928">
 
     <Grid Background="#00bbd3" Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
@@ -51,16 +51,18 @@
                 </GroupBox>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="5,5,5,5">
-                <Image Name="imagePanel" Width="900" Height="550" Margin="5,5,5,5" Source="Resources/FishWhite.png"></Image>
-                <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
-                    <TextBlock Name="imageFishName" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" Width="Auto">Name</TextBlock>
-                    <TextBlock Name="countOfFishesText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" Width="300">Count of Image with Fish : 0</TextBlock>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="5,5,5,5">
-                    <TextBlock Name="countOfEmptyFishesText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" Width="340">Count of Image without Fish : 0</TextBlock>
-                    <TextBlock Name="IndexText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" Width="340">Image 0 of 0</TextBlock>
+                <Canvas x:Name="canvasFish" Margin="0,0,0,0" Width="800" Height="620"  >
+                    <Image Name="imagePanel" Width="800" Height="620" Source="Resources/FishWhite.png" Margin="0,0,0,0"></Image>
+                    <Rectangle Name="fishBox2" StrokeThickness="4" Stroke="#62eeff" Visibility="Hidden"  Fill="Black" />
+                    <Rectangle x:Name="fishBox" StrokeThickness="4" Stroke="#62eeff" Visibility="Visible"  Width="300" Height="100" />                    
+                </Canvas>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="5,5,5,5" Width=" 350">
+                    <TextBlock Name="imageFishName" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" >Name</TextBlock>
+                <TextBlock Name="countOfFishesText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5">Count of Image with Fish : 0</TextBlock>
+                <TextBlock Name="countOfEmptyFishesText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5">Count of Image without Fish : 0</TextBlock>
+                    <TextBlock Name="IndexText" Background="White" FontSize="20" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" >Image 0 of 0</TextBlock>
                 </StackPanel>
             </StackPanel>
-        </StackPanel>
     </Grid>
 </Window>
