@@ -1,0 +1,51 @@
+﻿<Window x:Class="ImageYOLOManipulation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageYOLOManipulation"
+        mc:Ignorable="d"
+        Title="YOLO Image Preperations" Height="690.541" Width="1152.703">
+
+    <Grid Background="#00bbd3">
+        <StackPanel Name="stackOrganizeHorizontal" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <StackPanel Name="stackOptionsVertical" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="280">
+                <GroupBox Header="Load" Foreground="White" FontSize="25" Margin="5">        
+                    <Button Name="buttonLoadImage" Height="50" Margin=" 0,5,0,5" Click="ButtonLoadImage_Click">Load Images</Button>            
+                </GroupBox>
+                <GroupBox Header="Annotation" Foreground="White" FontSize="25" Margin="5">
+                    <Button Name="buttonAnnotate" Height="50" Margin=" 0,5,0,5">Annotate</Button>
+                </GroupBox>
+                <GroupBox Header="Play Images" Foreground="White" FontSize="25" Margin="5">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Foreground="White" FontSize="15" VerticalAlignment="Center">10ms</TextBlock>
+                            <Slider Name="scrollPlay"  Minimum="10" Maximum="2000" Height="20" Margin=" 5,5,5,5" HorizontalAlignment="Stretch" Width="160"/>
+                            <TextBlock Foreground="White" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center">2s</TextBlock>
+                        </StackPanel>
+                        <Button Name="buttonPlay" Height="50" Margin=" 0,5,0,5">Play</Button>
+                    </StackPanel>
+                </GroupBox>                    
+                <GroupBox Header="Class Configure" Foreground="White" FontSize="25" Margin="5">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" Margin="5,0,5,0">
+                            <TextBlock FontSize="15" VerticalAlignment="Center" Margin="15,5,0,0">Class</TextBlock>
+                            <TextBox Width="120" Margin="80,5,0,0" Height="30"></TextBox>
+                        </StackPanel>
+                        <Button Name="buttonConfigureClass" Height="50" Margin=" 0,5,0,5">
+                            <TextBlock HorizontalAlignment="Center" >Set class</TextBlock>
+                        </Button>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Show" Foreground="White" FontSize="25" Margin="5">
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox VerticalAlignment="Center" Foreground="White" FontSize="20" >
+                            <TextBlock VerticalAlignment="Top">Show Images with Fish </TextBlock>
+                        </CheckBox>
+                        <CheckBox Foreground="White" FontSize="20">Show Images without Fish</CheckBox>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
