@@ -27,6 +27,8 @@ namespace ImageYOLOManipulation
         public MainWindow()
         {
             InitializeComponent();
+            //global::ImageYOLOManipulation.Properties.Resources
+            GetImage(Environment.CurrentDirectory+"/FishWhite.png");
         }
         string pathOfOneImage;
         string[] pathOfAllImages;
@@ -35,7 +37,8 @@ namespace ImageYOLOManipulation
         FishImage[] Fishes;
         int indexofShowingFish = 0;
         bool stopPlay = false;
-        
+        int[] listOfAnnotatedWithObjects = new int[0];
+        int[] listOfAnnotatedWithoutObjects = new int[0];     
         private void ButtonLoadImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog loadImageFiles = new OpenFileDialog();
@@ -49,29 +52,40 @@ namespace ImageYOLOManipulation
         }
         void ShowImage()
         {
-            pathOfAllImages = Directory.GetFiles(System.IO.Path.GetDirectoryName(pathOfOneImage), "*.jpeg", SearchOption.TopDirectoryOnly);
+            pathOfAllImages = Directory.GetFiles(System.IO.Path.GetDirectoryName(pathOfOneImage), "*.jpg", SearchOption.TopDirectoryOnly);
             Fishes = new FishImage[pathOfAllImages.Length];
             int index = 0;
             foreach ( string pathOfImage in pathOfAllImages)
             {
                 Fishes[index] = new FishImage(pathOfImage);
                 if (Fishes[index].IsAnnotated() == true)
+                {
                     countOfImagesWithFish++;
+                    Array.Resize(ref listOfAnnotatedWithObjects, listOfAnnotatedWithObjects.Length + 1);
+                    listOfAnnotatedWithObjects[listOfAnnotatedWithObjects.Length - 1] = index;
+                }
                 else
+                {
                     countOfEmptyImags++;
+                    Array.Resize(ref listOfAnnotatedWithoutObjects, listOfAnnotatedWithoutObjects.Length + 1);
+                    listOfAnnotatedWithoutObjects[listOfAnnotatedWithoutObjects.Length - 1] = index;
+                }
                 index++;
             }
-             
-            
             countOfFishesText.Dispatcher.Invoke(new Action(() => { countOfFishesText.Text = "Count of Image with Fish : " + countOfImagesWithFish.ToString(); }));
             countOfEmptyFishesText.Dispatcher.Invoke(new Action(() => { countOfEmptyFishesText.Text = "Count of Image without Fish : " + countOfEmptyImags.ToString(); }));
             GUIShowImage();
         }
         private void GUIShowImage()
         {
+            AdjustIndex();
+            GetImage();
+        }
+        private void AdjustIndex()
+        {
             bool show = false;
             bool showFishesImages = false, showEmptyImages = false;
-            showEmpty.Dispatcher.Invoke(new Action(() => { showEmptyImages =(bool) showEmpty.IsChecked; }));
+            showEmpty.Dispatcher.Invoke(new Action(() => { showEmptyImages = (bool)showEmpty.IsChecked; }));
             showFish.Dispatcher.Invoke(new Action(() => { showFishesImages = (bool)showFish.IsChecked; }));
             while (!show)
             {
@@ -96,18 +110,49 @@ namespace ImageYOLOManipulation
                 else
                     return;
             }
+        }
+        private void GetImage()
+        {
             imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Source = Fishes[indexofShowingFish].GetImage(); }));
+            imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Width = Fishes[indexofShowingFish].GetImageDimension()[0]; }));
+            imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Height = Fishes[indexofShowingFish].GetImageDimension()[1]; }));
             imageFishName.Dispatcher.Invoke(new Action(() => { imageFishName.Text = "Name : " + Fishes[indexofShowingFish].ImageName(); }));
             IndexText.Dispatcher.Invoke(new Action(() => { IndexText.Text = "Image " + indexofShowingFish.ToString() + " of " + pathOfAllImages.Length.ToString(); }));
             if (Fishes[indexofShowingFish].IsAnnotated())
             {
                 double[][] fishes = Fishes[indexofShowingFish].GetFishRectangles();
-                //canvasFish.Children.Add(fishBox);
+
+                canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Width = Fishes[indexofShowingFish].GetImageDimension()[0]; }));
+                canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Height = Fishes[indexofShowingFish].GetImageDimension()[1]; }));
                 canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetLeft(fishBox, fishes[0][0]); }));
                 canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetTop(fishBox, fishes[0][1]); }));
-                fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Width = fishes[0][2];  }));
+                fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Width = fishes[0][2]; }));
                 fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Height = fishes[0][3]; }));
             }
+        }
+        private void GetImage( string path)
+        {
+            BitmapImage Image = new BitmapImage(new Uri(path));
+            
+            imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Source = Image; }));
+            imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Width = 800; }));
+            imagePanel.Dispatcher.Invoke(new Action(() => { imagePanel.Height = 600; }));
+            imageFishName.Dispatcher.Invoke(new Action(() => { imageFishName.Text = "Name : " ; }));
+            IndexText.Dispatcher.Invoke(new Action(() => { IndexText.Text = "Image 0 of  0" ; }));
+            canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Width = 800; }));
+            canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Height = 600; }));
+
+            //if (Fishes[indexofShowingFish].IsAnnotated())
+            //{
+            //    double[][] fishes = Fishes[indexofShowingFish].GetFishRectangles();
+
+            //    canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Width = Fishes[indexofShowingFish].GetImageDimension()[0]; }));
+            //    canvasFish.Dispatcher.Invoke(new Action(() => { canvasFish.Height = Fishes[indexofShowingFish].GetImageDimension()[1]; }));
+            //    canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetLeft(fishBox, fishes[0][0]); }));
+            //    canvasFish.Dispatcher.Invoke(new Action(() => { Canvas.SetTop(fishBox, fishes[0][1]); }));
+            //    fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Width = fishes[0][2]; }));
+            //    fishBox.Dispatcher.Invoke(new Action(() => { fishBox.Height = fishes[0][3]; }));
+            //}
         }
         private void Invoke(Action action)
         {
@@ -144,6 +189,63 @@ namespace ImageYOLOManipulation
                 slidePlay.Dispatcher.Invoke(new Action(() => { speed = slidePlay.Value; }));
                 System.Threading.Thread.Sleep((int)speed);
             }
+        }
+
+        private void ButtonConfigureClass_Click(object sender, RoutedEventArgs e)
+        {
+            Thread classCalc = new Thread(classes);
+            classCalc.SetApartmentState(ApartmentState.STA);
+            classCalc.Start();
+        }
+
+        private void classes()
+        {
+            ChangeClass();
+            
+        }
+        private void ChangeClass()
+        {
+            for (int i=0; i< listOfAnnotatedWithObjects.Length;i++)
+            {
+                string annnotationPath = Fishes[listOfAnnotatedWithObjects[i]].GetAnnotationPath();
+                string[] rectangles = File.ReadAllLines(annnotationPath);
+                if (rectangles.Length > 0)
+                {
+                    for (int ii = 0; ii < rectangles.Length; ii++)
+                    {
+                        string[] splittedString = rectangles[ii].Split(' ');
+                        rectangles[ii] = classTextBox.Text + " " + splittedString[1] + " " + splittedString[2] + " " + splittedString[3] + " " + splittedString[4];
+                    }
+                }
+                File.WriteAllLines(annnotationPath, rectangles);
+            }
+        }
+        private int[] GetRandomTestList(int[] list, int testPrecentage)
+        {
+            Random rnd = new Random();
+            int[] outputList = new int[list.Length * testPrecentage];
+            for (int h = 0; h < list.Length; h++)
+            {
+                int rndom = 0;
+                while (outputList.Contains(rndom))
+                {
+                    rndom = rnd.Next(0, outputList.Length - 1);
+                }
+                outputList[h] = rndom;
+            }
+            return outputList;
+        }
+        private string[] GetSavingList(bool isTest, int[] list,int [] testList)
+        {
+            string[] savingList = new string[list.Length];
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (testList.Contains(i))
+                {
+                    string annnotationPath = Fishes[list[i]].GetAnnotationPath();
+                }
+            }
+            return savingList;
         }
     }
 
@@ -212,6 +314,17 @@ namespace ImageYOLOManipulation
         public void UnloadImage()
         {
             fishImage = null;
+        }
+        public double [] GetImageDimension()
+        {
+            double [] dimension = new double[2];
+            dimension[0] = imageWidth;
+            dimension[1] = imageHeight;
+            return dimension;
+        }
+        public string GetAnnotationPath()
+        {
+            return annotationPath;
         }
          ~FishImage()
         {
