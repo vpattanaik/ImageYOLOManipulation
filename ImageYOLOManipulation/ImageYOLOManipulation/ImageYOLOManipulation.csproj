@@ -99,5 +99,17 @@
     <Resource Include="Resources\FishBlue.png" />
     <Resource Include="Resources\FishWhite.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\triangle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\trianglereverse.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\triangleFill.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\trianglereverseFill.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

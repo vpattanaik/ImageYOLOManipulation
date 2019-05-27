@@ -28,8 +28,54 @@ namespace ImageYOLOManipulation
         {
             InitializeComponent();
             //global::ImageYOLOManipulation.Properties.Resources
-            GetImage(Environment.CurrentDirectory+"/FishWhite.png");
+            GetImage(Environment.CurrentDirectory + "/FishWhite.png");
+            MouseLeftButtonDown += MainWindow_MouseLeftButtonDown;
+            MouseMove += MainWindow_MouseMove;
+            MouseLeftButtonUp += MainWindow_MouseLeftButtonUp;
         }
+
+
+
+        Point [] startPoint = new Point[0];
+        Rectangle[] rectAnnotate = new  Rectangle[0];
+        bool isRectStarted = false;
+
+        private void MainWindow_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (isAnnotation)
+            {
+                Array.Resize(ref startPoint, startPoint.Length + 1);
+                startPoint[startPoint.Length - 1] = e.GetPosition(canvasFish);
+                Array.Resize(ref rectAnnotate, rectAnnotate.Length + 1);
+                rectAnnotate[rectAnnotate.Length - 1] = new Rectangle{Stroke = Brushes.LightBlue,StrokeThickness = 2};
+                Canvas.SetLeft(rectAnnotate[rectAnnotate.Length - 1], startPoint[startPoint.Length - 1].X);
+                Canvas.SetTop(rectAnnotate[rectAnnotate.Length - 1], startPoint[startPoint.Length - 1].Y);
+                canvasFish.Children.Add(rectAnnotate[rectAnnotate.Length - 1]);
+                isRectStarted = true;
+            }
+
+        }
+        private void MainWindow_MouseMove(object sender, MouseEventArgs e)
+        {
+           if (isRectStarted)
+            {
+                Point tempPoint = e.GetPosition(canvasFish);
+                rectAnnotate[rectAnnotate.Length - 1].Width =Math.Max( tempPoint.X - startPoint[startPoint.Length - 1].X,0);
+                rectAnnotate[rectAnnotate.Length - 1].Height = Math.Max(tempPoint.Y - startPoint[startPoint.Length - 1].Y,0);
+            }
+        }
+        private void MainWindow_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isRectStarted)
+            {
+                Point tempPoint = e.GetPosition(canvasFish);
+                rectAnnotate[rectAnnotate.Length - 1].Width = Math.Max(tempPoint.X - startPoint[startPoint.Length - 1].X,0);
+                rectAnnotate[rectAnnotate.Length - 1].Height = Math.Max(tempPoint.Y - startPoint[startPoint.Length - 1].Y,0);
+                isRectStarted = false;
+            }
+
+        }
+
         string pathOfOneImage;
         string[] pathOfAllImages;
         int countOfImagesWithFish;
@@ -38,7 +84,8 @@ namespace ImageYOLOManipulation
         int indexofShowingFish = 0;
         bool stopPlay = false;
         int[] listOfAnnotatedWithObjects = new int[0];
-        int[] listOfAnnotatedWithoutObjects = new int[0];     
+        int[] listOfAnnotatedWithoutObjects = new int[0];
+        bool isAnnotation = false;
         private void ButtonLoadImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog loadImageFiles = new OpenFileDialog();
@@ -52,7 +99,7 @@ namespace ImageYOLOManipulation
         }
         void ShowImage()
         {
-            pathOfAllImages = Directory.GetFiles(System.IO.Path.GetDirectoryName(pathOfOneImage), "*.jpg", SearchOption.TopDirectoryOnly);
+            pathOfAllImages = Directory.GetFiles(System.IO.Path.GetDirectoryName(pathOfOneImage), "*.jpeg", SearchOption.TopDirectoryOnly);
             Fishes = new FishImage[pathOfAllImages.Length];
             int index = 0;
             foreach ( string pathOfImage in pathOfAllImages)
@@ -201,11 +248,25 @@ namespace ImageYOLOManipulation
         private void classes()
         {
             ChangeClass();
-            
+            int[] testListOfObjectsImages = GetRandomTestList(listOfAnnotatedWithObjects, 0.1);
+            int[] testListOfEmptyImages = GetRandomTestList(listOfAnnotatedWithoutObjects, 0.1);
+            string[] saveTrainWithObject = GetSavingList(false, listOfAnnotatedWithObjects, testListOfObjectsImages);
+            string[] saveTrainEmptyObject = GetSavingList(false, listOfAnnotatedWithoutObjects, testListOfEmptyImages);
+            string[] saveTestWithObject = GetSavingList(true, listOfAnnotatedWithObjects, testListOfObjectsImages);
+            string[] saveTestEmptyObject = GetSavingList(true, listOfAnnotatedWithoutObjects, testListOfEmptyImages);
+            string[] train = saveTrainWithObject.Concat(saveTrainEmptyObject).ToArray();
+            string[] test = saveTestWithObject.Concat(saveTestEmptyObject).ToArray();
+            SaveFileDialog saveTrainingDialog = new SaveFileDialog();
+            saveTrainingDialog.DefaultExt = "*.txt";
+            saveTrainingDialog.ShowDialog();
+            File.WriteAllLines(saveTrainingDialog.FileName + "_train", train);
+            File.WriteAllLines(saveTrainingDialog.FileName + "_test", test);
         }
         private void ChangeClass()
         {
-            for (int i=0; i< listOfAnnotatedWithObjects.Length;i++)
+            string classNumber="";
+            classTextBox.Dispatcher.Invoke(new Action(() => { classNumber = classTextBox.Text; }));
+                for (int i=0; i< listOfAnnotatedWithObjects.Length;i++)
             {
                 string annnotationPath = Fishes[listOfAnnotatedWithObjects[i]].GetAnnotationPath();
                 string[] rectangles = File.ReadAllLines(annnotationPath);
@@ -214,38 +275,150 @@ namespace ImageYOLOManipulation
                     for (int ii = 0; ii < rectangles.Length; ii++)
                     {
                         string[] splittedString = rectangles[ii].Split(' ');
-                        rectangles[ii] = classTextBox.Text + " " + splittedString[1] + " " + splittedString[2] + " " + splittedString[3] + " " + splittedString[4];
+                        rectangles[ii] = classNumber + " " + splittedString[1] + " " + splittedString[2] + " " + splittedString[3] + " " + splittedString[4];
                     }
                 }
                 File.WriteAllLines(annnotationPath, rectangles);
             }
         }
-        private int[] GetRandomTestList(int[] list, int testPrecentage)
+        private int[] GetRandomTestList(int[] list, double testPrecentage)
         {
             Random rnd = new Random();
-            int[] outputList = new int[list.Length * testPrecentage];
-            for (int h = 0; h < list.Length; h++)
+            int[] outputList = new int[(int)(list.Length * testPrecentage)];
+            for (int h = 0; h < outputList.Length; h++)
             {
                 int rndom = 0;
                 while (outputList.Contains(rndom))
                 {
-                    rndom = rnd.Next(0, outputList.Length - 1);
+                    rndom = rnd.Next(0, list.Length - 1);
                 }
                 outputList[h] = rndom;
             }
             return outputList;
         }
-        private string[] GetSavingList(bool isTest, int[] list,int [] testList)
+        private string[] GetSavingList(bool getTest, int[] list,int [] testList)
         {
-            string[] savingList = new string[list.Length];
+            string[] savingList;
+            if (getTest)
+            {
+                savingList = new string[testList.Length];
+            }
+            else
+            {
+                savingList = new string[list.Length - testList.Length];
+            }
+            int index = 0;
             for (int i = 0; i < list.Length; i++)
             {
-                if (testList.Contains(i))
+                if (getTest)
                 {
-                    string annnotationPath = Fishes[list[i]].GetAnnotationPath();
+                    if (testList.Contains(i))
+                    {
+                        savingList[index] = Fishes[list[i]].GetImagePath();
+                        index++;
+                    }
+                }
+                else
+                {
+                    if (!testList.Contains(i))
+                    {
+                        savingList[index] = Fishes[list[i]].GetImagePath();
+                        index++;
+                    }
                 }
             }
             return savingList;
+        }
+
+        private void ButtonPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            if (indexofShowingFish > 0)
+            {
+                SaveAnnotation();
+                indexofShowingFish--;
+                GUIShowImage();
+            }
+        }
+
+        private void ButtonNext_Click(object sender, RoutedEventArgs e)
+        {
+            if (indexofShowingFish < Fishes.Length)
+            {
+                SaveAnnotation();
+                indexofShowingFish++;
+                GUIShowImage();
+            }
+        }
+        void SaveAnnotation()
+        {
+            if(rectAnnotate.Length>0)
+            {
+                SaveRotatedImage();
+                SaveAnnotationFile();
+                SaveAnnotation90DegreeFile();
+                foreach (Rectangle rectangle in rectAnnotate)
+                {
+                    canvasFish.Children.Remove(rectangle);
+                }
+                startPoint = new Point[0];
+                rectAnnotate = new Rectangle[0];
+            }
+        }
+        void SaveRotatedImage()
+        {
+            BitmapImage imageCopy = Fishes[indexofShowingFish].GetImage();
+            imageCopy.Rotation= Rotation.Rotate90;
+            BitmapEncoder imageEncoder = new PngBitmapEncoder();
+            imageEncoder.Frames.Add(BitmapFrame.Create(imageCopy));
+
+            using (var fileStream = new System.IO.FileStream(Fishes[indexofShowingFish].GetImageDirectory() +"/"+ Fishes[indexofShowingFish].ImageName() + "_Rotated 90.jpeg", System.IO.FileMode.Create))
+            {
+                imageEncoder.Save(fileStream);
+            }
+        }
+        void SaveAnnotationFile()
+        {
+            string[] rectangles = new string[rectAnnotate.Length];
+            for (int ii = 0; ii < rectAnnotate.Length; ii++)
+            {
+                double w = 0, h = 0, x = 0, y = 0;
+                w = rectAnnotate[ii].Width / Fishes[indexofShowingFish].GetImageDimension()[0];
+                h = rectAnnotate[ii].Height / Fishes[indexofShowingFish].GetImageDimension()[1];
+                x = ((rectAnnotate[ii].Width/2)+startPoint[ii].X) / Fishes[indexofShowingFish].GetImageDimension()[0];
+                y = ((rectAnnotate[ii].Height / 2) + startPoint[ii].Y)/ Fishes[indexofShowingFish].GetImageDimension()[1];
+
+            rectangles[ii] = "0" + " " + x.ToString() + " " + y.ToString() + " " + w.ToString() + " " + h.ToString();
+            }
+            File.WriteAllLines(Fishes[indexofShowingFish].GetImageDirectory() + "/" + Fishes[indexofShowingFish].ImageName()+".txt", rectangles);
+        }
+        void SaveAnnotation90DegreeFile()
+        {
+            string[] rectangles = new string[rectAnnotate.Length];
+            for (int ii = 0; ii < rectAnnotate.Length; ii++)
+            {
+                double w = 0, h = 0, x = 0, y = 0;
+                h = rectAnnotate[ii].Width / Fishes[indexofShowingFish].GetImageDimension()[0];
+                w = rectAnnotate[ii].Height / Fishes[indexofShowingFish].GetImageDimension()[1];
+                y = ((rectAnnotate[ii].Width / 2) + startPoint[ii].X) / Fishes[indexofShowingFish].GetImageDimension()[0]; 
+                x = ((rectAnnotate[ii].Height / 2) + startPoint[ii].Y) / Fishes[indexofShowingFish].GetImageDimension()[1]; 
+
+                rectangles[ii] = "0" + " " + x.ToString() + " " + y.ToString() + " " + w.ToString() + " " + h.ToString();
+            }
+            File.WriteAllLines(Fishes[indexofShowingFish].GetImageDirectory() + "/" + Fishes[indexofShowingFish].ImageName() + "_Rotated 90"+".txt", rectangles);
+        }
+        private void ButtonAnnotate_Click(object sender, RoutedEventArgs e)
+        {
+            if (isAnnotation)
+            {
+                isAnnotation = false;
+                buttonAnnotate.Content = "Annotation";
+
+            }
+            else
+            {
+                isAnnotation = true;
+                buttonAnnotate.Content = "Stop Annotation";
+            }
         }
     }
 
@@ -326,7 +499,16 @@ namespace ImageYOLOManipulation
         {
             return annotationPath;
         }
-         ~FishImage()
+        public string GetImagePath()
+        {
+            return imagePath;
+        }
+        public string GetImageDirectory()
+        {
+            return imageDirectory;
+        }
+     
+        ~FishImage()
         {
             isImageLoaded = false;
             fishImage = null;

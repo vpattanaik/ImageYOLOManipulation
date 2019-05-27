@@ -15,10 +15,10 @@
         <StackPanel Name="stackOrganizeHorizontal" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <StackPanel Name="stackOptionsVertical" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="280">
                 <GroupBox Header="Load" Foreground="White" FontSize="25" Margin="5">
-                    <Button Name="buttonLoadImage" Height="50" Margin=" 0,5,0,5" Click="ButtonLoadImage_Click">Load Images</Button>
+                    <Button Name="buttonLoadImage" Height="50" Margin=" 0,5,0,5" Click="ButtonLoadImage_Click" Style="{StaticResource Fish}">Load Images</Button>
                 </GroupBox>
                 <GroupBox Header="Annotation" Foreground="White" FontSize="25" Margin="5">
-                    <Button Name="buttonAnnotate" Height="50" Margin=" 0,5,0,5">Annotate</Button>
+                    <Button Name="buttonAnnotate" Height="50" Margin=" 0,5,0,5" Style="{StaticResource Fish}" Click="ButtonAnnotate_Click">Annotate</Button>
                 </GroupBox>
                 <GroupBox Header="Play Images" Foreground="White" FontSize="25" Margin="5">
                     <StackPanel Orientation="Vertical">
@@ -27,7 +27,7 @@
                             <Slider Name="slidePlay" Value="1000" Minimum="10" Maximum="2000" Height="20" Margin=" 5,5,5,5" HorizontalAlignment="Stretch" Width="160"/>
                             <TextBlock Foreground="White" FontSize="15" HorizontalAlignment="Right" VerticalAlignment="Center">2s</TextBlock>
                         </StackPanel>
-                        <Button Name="buttonPlay" Height="50" Margin=" 0,5,0,5" Click="ButtonPlay_Click">Play</Button>
+                        <Button Name="buttonPlay" Height="50" Margin=" 0,5,0,5" Click="ButtonPlay_Click" Style="{StaticResource Fish}">Play</Button>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Class Configure" Foreground="White" FontSize="25" Margin="5">
@@ -36,7 +36,7 @@
                             <TextBlock FontSize="15" VerticalAlignment="Center" Margin="15,5,0,0">Class</TextBlock>
                             <TextBox Name="classTextBox" Width="120" Margin="80,5,0,0" Height="30"></TextBox>
                         </StackPanel>
-                        <Button Name="buttonConfigureClass" Height="50" Margin=" 0,5,0,5" Click="ButtonConfigureClass_Click">
+                        <Button Name="buttonConfigureClass" Height="50" Margin=" 0,5,0,5" Click="ButtonConfigureClass_Click" Style="{StaticResource Fish}">
                             <TextBlock HorizontalAlignment="Center" >Set class</TextBlock>
                         </Button>
                     </StackPanel>
@@ -51,16 +51,16 @@
                 </GroupBox>
             </StackPanel>
             <StackPanel Width="50">
-                
+                <Button Name="buttonPrevious" Width=" 50" Height="600" Style="{StaticResource Prev}" Click="ButtonPrevious_Click"></Button>
             </StackPanel>
-            <StackPanel Orientation="Vertical" Margin="5,5,5,5">
+            <StackPanel Orientation="Vertical" Margin="5,5,5,5" >
                 <Canvas x:Name="canvasFish" Margin="0,0,0,0"  >                    
                      <Image Name="imagePanel"  Margin="0,0,0,0"></Image>
                     <Rectangle x:Name="fishBox" StrokeThickness="4" Stroke="#62eeff" Visibility="Visible"  />
                 </Canvas>
             </StackPanel>
             <StackPanel Width="50">
-
+                <Button Name="buttonNext" Width=" 50" Height="600" Style="{StaticResource Next}" Click="ButtonNext_Click"></Button>
             </StackPanel>
             <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="5,5,5,5" Width=" 250">
                     <TextBlock Name="imageFishName" Background="White" FontSize="16" Foreground="#008ba2" Padding="5,0,5,5" Margin="5,5,5,5" >Name</TextBlock>
