@@ -1,5 +1,5 @@
 # YOLO Dataset Preperation 
-This application is developed for Project using YOLO for Fish Types Detection.
+This application is developed for easier data preparation for YOLO.
 The application can do (after loading all images in folder)
 1-Create Images Annotation, and create a rotated 90 degree version to increase the dataset.
 2-Play Dataset with different speed with the ability to show only images with annotated objects or images without any annotation or both.
